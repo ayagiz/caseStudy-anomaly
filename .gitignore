@@ -1,10 +1,12 @@
 .streamlit/secrets.toml
 
+#do not add train data
+project/data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
 
