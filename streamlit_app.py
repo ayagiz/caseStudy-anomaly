@@ -12,9 +12,9 @@ category = st.selectbox(
 
 threshold = st.slider(
     "Threshold",
-    min_value=0.0,
-    max_value=10.0,
-    value=5.0,
+    min_value=3.0,
+    max_value=7.0,
+    value=4.7,
     step=0.1
 )
 
