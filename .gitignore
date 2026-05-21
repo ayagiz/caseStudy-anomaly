@@ -1,7 +1,6 @@
 .streamlit/secrets.toml
 
 #do not add train data
-project/data/
 data/
 
 # Byte-compiled / optimized / DLL files
