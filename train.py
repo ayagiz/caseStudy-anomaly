@@ -6,20 +6,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
 from torchvision import models, transforms
+import gc
 
-
+PATCHES_PER_IMAGE = 30
 CATEGORIES = ["hazelnut", "wood"]
 DATA_ROOT = Path("data/")
 SAVE_PATH = Path("models/patchcore_memory.pkl")
-IMAGE_SIZE = 224
+IMAGE_SIZE = 160
 
 
 class FeatureExtractor(nn.Module):
     def __init__(self):
         super().__init__()
 
-        weights = models.Wide_ResNet50_2_Weights.DEFAULT
-        backbone = models.wide_resnet50_2(weights=weights)
+        weights = models.ResNet18_Weights.DEFAULT
+        backbone = models.resnet18(weights=weights)
 
         self.layer1 = nn.Sequential(
             backbone.conv1,
@@ -92,18 +93,33 @@ def build_memory_bank_for_category(model, category, device):
     for idx, image_path in enumerate(image_paths):
         image_tensor = preprocess_image(image_path)
         features = extract_patch_features(model, image_tensor, device)
+
+        if features.shape[0] > PATCHES_PER_IMAGE:
+            indices = torch.randperm(features.shape[0])[:PATCHES_PER_IMAGE]
+            features = features[indices]
+
         memory_bank.append(features)
 
         print(f"[{idx + 1}/{len(image_paths)}] {image_path.name}")
 
     memory_bank = torch.cat(memory_bank, dim=0)
 
+    # Final category-level sampling
+    MAX_MEMORY_SIZE = 3000
+
+    if memory_bank.shape[0] > MAX_MEMORY_SIZE:
+        indices = torch.randperm(memory_bank.shape[0])[:MAX_MEMORY_SIZE]
+        memory_bank = memory_bank[indices]
+
     print(f"{category} memory bank shape: {memory_bank.shape}")
+
+    gc.collect()
 
     return memory_bank
 
 
 def main():
+    print("Training started...", flush=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
