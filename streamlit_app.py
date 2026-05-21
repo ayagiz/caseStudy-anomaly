@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 
-from project.infer import predict_image
+from infer import predict_image
 
 # Başlık
 st.title("MVTec Anomaly Detection")
