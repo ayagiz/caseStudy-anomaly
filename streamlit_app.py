@@ -13,9 +13,9 @@ category = st.selectbox(
 threshold = st.slider(
     "Threshold",
     min_value=0.0,
-    max_value=1.0,
-    value=0.5,
-    step=0.01
+    max_value=50.0,
+    value=10.0,
+    step=0.5
 )
 
 uploaded_files = st.file_uploader(
