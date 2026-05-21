@@ -3,12 +3,13 @@ from PIL import Image
 
 from infer import predict_image
 
-# Başlık
 st.title("MVTec Anomaly Detection")
 
-st.write("Upload one or more images.")
+category = st.selectbox(
+    "Select product category",
+    ["hazelnut", "wood"]
+)
 
-# Threshold slider
 threshold = st.slider(
     "Threshold",
     min_value=0.0,
@@ -17,40 +18,36 @@ threshold = st.slider(
     step=0.01
 )
 
-# Çoklu image upload
 uploaded_files = st.file_uploader(
     "Choose images",
     type=["png", "jpg", "jpeg"],
     accept_multiple_files=True
 )
 
-# Eğer image varsa
 if uploaded_files:
-
+    st.write(f"Selected category: **{category}**")
     st.write(f"{len(uploaded_files)} image(s) uploaded.")
 
     for uploaded_file in uploaded_files:
+        image = Image.open(uploaded_file).convert("RGB")
 
-        # Image aç
-        image = Image.open(uploaded_file)
+        result = predict_image(
+            image=image,
+            category=category,
+            threshold=threshold
+        )
 
-        # Prediction al
-        result = predict_image(image, threshold)
-
-        # Dosya adı
         st.subheader(uploaded_file.name)
 
-        # Görsel göster
         st.image(
             image,
+            caption="Uploaded Image",
             use_container_width=True
         )
 
-        # Sonuç göster
-        st.write(f"Prediction: {result['prediction']}")
-        st.write(f"Anomaly Score: {result['anomaly_score']:.2f}")
+        st.write(f"Prediction: **{result['prediction']}**")
+        st.write(f"Anomaly Score: `{result['anomaly_score']:.2f}`")
 
-        # Renkli durum mesajı
         if result["prediction"] == "ANOMALY":
             st.error("Anomaly Detected")
         else:

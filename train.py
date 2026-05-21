@@ -3,11 +3,13 @@ import pickle
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from PIL import Image
 from torchvision import models, transforms
 
 
-DATASET_PATH = Path("data/mvtec/hazelnut/train/good")
+CATEGORIES = ["hazelnut", "wood"]
+DATA_ROOT = Path("data/")
 SAVE_PATH = Path("models/patchcore_memory.pkl")
 IMAGE_SIZE = 224
 
@@ -56,8 +58,7 @@ def extract_patch_features(model, image_tensor, device):
         image_tensor = image_tensor.to(device)
         f2, f3 = model(image_tensor)
 
-        # f3 boyutunu f2 ile eşitle
-        f3 = torch.nn.functional.interpolate(
+        f3 = F.interpolate(
             f3,
             size=f2.shape[-2:],
             mode="bilinear",
@@ -66,26 +67,25 @@ def extract_patch_features(model, image_tensor, device):
 
         features = torch.cat([f2, f3], dim=1)
 
-        # [B, C, H, W] -> [H*W, C]
-        features = features.squeeze(0).permute(1, 2, 0).reshape(-1, features.shape[1])
+        features = (
+            features
+            .squeeze(0)
+            .permute(1, 2, 0)
+            .reshape(-1, features.shape[1])
+        )
 
         return features.cpu()
 
 
-def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    print(f"Using device: {device}")
-
-    image_paths = sorted(list(DATASET_PATH.glob("*.png")))
+def build_memory_bank_for_category(model, category, device):
+    train_path = DATA_ROOT / category / "train" / "good"
+    image_paths = sorted(list(train_path.glob("*.png")))
 
     if len(image_paths) == 0:
-        raise FileNotFoundError(f"No images found in {DATASET_PATH}")
+        raise FileNotFoundError(f"No training images found in: {train_path}")
 
+    print(f"\nCategory: {category}")
     print(f"Found {len(image_paths)} training images.")
-
-    model = FeatureExtractor().to(device)
-    model.eval()
 
     memory_bank = []
 
@@ -94,21 +94,42 @@ def main():
         features = extract_patch_features(model, image_tensor, device)
         memory_bank.append(features)
 
-        print(f"[{idx + 1}/{len(image_paths)}] processed: {image_path.name}")
+        print(f"[{idx + 1}/{len(image_paths)}] {image_path.name}")
 
     memory_bank = torch.cat(memory_bank, dim=0)
+
+    print(f"{category} memory bank shape: {memory_bank.shape}")
+
+    return memory_bank
+
+
+def main():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Using device: {device}")
+
+    model = FeatureExtractor().to(device)
+    model.eval()
+
+    all_memory_banks = {}
+
+    for category in CATEGORIES:
+        memory_bank = build_memory_bank_for_category(
+            model=model,
+            category=category,
+            device=device,
+        )
+
+        all_memory_banks[category] = {
+            "image_size": IMAGE_SIZE,
+            "memory_bank": memory_bank,
+        }
 
     SAVE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     with open(SAVE_PATH, "wb") as f:
-        pickle.dump({
-            "category": "hazelnut",
-            "image_size": IMAGE_SIZE,
-            "memory_bank": memory_bank,
-        }, f)
+        pickle.dump(all_memory_banks, f)
 
-    print(f"Memory bank saved to: {SAVE_PATH}")
-    print(f"Memory bank shape: {memory_bank.shape}")
+    print(f"\nSaved all memory banks to: {SAVE_PATH}")
 
 
 if __name__ == "__main__":
