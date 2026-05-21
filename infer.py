@@ -104,7 +104,7 @@ def predict_image(image, category="hazelnut", threshold=0.5):
     min_distances, _ = torch.min(distances, dim=1)
 
     # Image-level anomaly score
-    anomaly_score = float(torch.max(min_distances).item())
+    anomaly_score = float(torch.quantile(min_distances, 0.99).item())
 
     prediction = "ANOMALY" if anomaly_score >= threshold else "NORMAL"
 
