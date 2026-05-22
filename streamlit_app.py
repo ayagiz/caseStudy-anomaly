@@ -18,6 +18,12 @@ threshold = st.slider(
     step=0.1
 )
 
+# it helps to set ground truth value before uploading image batch. it helps to reduce hand work
+default_ground_truth = st.selectbox(
+    "Default Ground Truth Label",
+    ["NORMAL", "ANOMALY"]
+)
+
 uploaded_files = st.file_uploader(
     "Choose images",
     type=["png", "jpg", "jpeg"],
@@ -47,6 +53,7 @@ if uploaded_files:
         ground_truth = st.radio(
             f"Ground Truth for {uploaded_file.name}",
             ["NORMAL", "ANOMALY"],
+            index=0 if default_ground_truth == "NORMAL" else 1,
             key=f"ground_truth_{idx}_{uploaded_file.name}"
         )
 
