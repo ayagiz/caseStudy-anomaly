@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 
 from infer import predict_image
+from sklearn.metrics import roc_auc_score
 
 st.title("MVTec Anomaly Detection")
 
@@ -38,6 +39,10 @@ if uploaded_files:
     fp = 0
     fn = 0
 
+    # for AUROC evaluation
+    all_scores = []
+    all_labels = []
+
     st.write(f"Selected category: **{category}**")
     st.write(f"{len(uploaded_files)} image(s) uploaded.")
 
@@ -70,6 +75,11 @@ if uploaded_files:
 
         elif ground_truth == "ANOMALY" and prediction == "NORMAL":
             fn += 1
+
+        label = 1 if ground_truth == "ANOMALY" else 0
+
+        all_labels.append(label)
+        all_scores.append(result["anomaly_score"])
 
         st.subheader(uploaded_file.name)
 
@@ -105,3 +115,37 @@ if uploaded_files:
     st.write(f"True Negative (TN): {tn}")
     st.write(f"False Positive (FP): {fp}")
     st.write(f"False Negative (FN): {fn}")
+
+    # Total samples
+    total = tp + tn + fp + fn
+
+    # Accuracy
+    accuracy = (tp + tn) / total if total > 0 else 0
+
+    # Precision
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+
+    # Recall
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+
+    # F1 Score
+    f1_score = (
+        2 * precision * recall / (precision + recall)
+        if (precision + recall) > 0 else 0
+    )
+
+    st.divider()
+
+    st.subheader("Evaluation Metrics")
+
+    st.write(f"Accuracy: {accuracy:.4f}")
+    st.write(f"Precision: {precision:.4f}")
+    st.write(f"Recall: {recall:.4f}")
+    st.write(f"F1 Score: {f1_score:.4f}")
+
+    # AUROC
+    try:
+        auroc = roc_auc_score(all_labels, all_scores)
+        st.write(f"AUROC: {auroc:.4f}")
+    except:
+        st.write("AUROC could not be calculated.")
