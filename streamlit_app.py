@@ -25,6 +25,13 @@ uploaded_files = st.file_uploader(
 )
 
 if uploaded_files:
+
+    # true positive, false positive, etc..
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+
     st.write(f"Selected category: **{category}**")
     st.write(f"{len(uploaded_files)} image(s) uploaded.")
 
@@ -36,6 +43,26 @@ if uploaded_files:
             category=category,
             threshold=threshold
         )
+
+        ground_truth = st.radio(
+            f"Ground Truth for {uploaded_file.name}",
+            ["NORMAL", "ANOMALY"],
+            key=uploaded_file.name
+        )
+
+        prediction = result["prediction"]
+
+        if ground_truth == "NORMAL" and prediction == "NORMAL":
+            tn += 1
+
+        elif ground_truth == "NORMAL" and prediction == "ANOMALY":
+            fp += 1
+
+        elif ground_truth == "ANOMALY" and prediction == "ANOMALY":
+            tp += 1
+
+        elif ground_truth == "ANOMALY" and prediction == "NORMAL":
+            fn += 1
 
         st.subheader(uploaded_file.name)
 
@@ -52,3 +79,12 @@ if uploaded_files:
             st.error("Anomaly Detected")
         else:
             st.success("Normal Image")
+            
+    st.divider()
+
+    st.subheader("Evaluation Summary")
+
+    st.write(f"True Positive (TP): {tp}")
+    st.write(f"True Negative (TN): {tn}")
+    st.write(f"False Positive (FP): {fp}")
+    st.write(f"False Negative (FN): {fn}")
