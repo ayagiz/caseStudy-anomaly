@@ -1,19 +1,5 @@
-# :earth_americas: GDP dashboard template
+# StreamLit Anomaly Detection project by Abdullah Yağız ÖZBEK
 
-A simple Streamlit app showing the GDP of different countries in the world.
-
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://gdp-dashboard-template.streamlit.app/)
-
-### How to run it on your own machine
-
-1. Install the requirements
-
-   ```
-   $ pip install -r requirements.txt
-   ```
-
-2. Run the app
-
-   ```
-   $ streamlit run app.py
-   ```
+1. 
+2. Proje StreamLit üzerinden deploy olduğu için kullanıcıya erişim https://casestudy-anomaly-i48z01ds9j.streamlit.app/ adresinden olmaktadır.
+3. url uzun süre açan olmaz ise uyku moduna giriyor bunun için uyandırmanız lazım. 2-3 dk sürebiliyor projenin açılması.
