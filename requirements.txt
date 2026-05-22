@@ -4,6 +4,6 @@ torchvision
 numpy
 pillow
 scikit-learn
-opencv-python
+opencv-python-headless
 matplotlib
 pandas
