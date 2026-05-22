@@ -35,7 +35,7 @@ if uploaded_files:
     st.write(f"Selected category: **{category}**")
     st.write(f"{len(uploaded_files)} image(s) uploaded.")
 
-    for uploaded_file in uploaded_files:
+    for idx, uploaded_file in enumerate(uploaded_files):
         image = Image.open(uploaded_file).convert("RGB")
 
         result = predict_image(
@@ -47,7 +47,7 @@ if uploaded_files:
         ground_truth = st.radio(
             f"Ground Truth for {uploaded_file.name}",
             ["NORMAL", "ANOMALY"],
-            key=uploaded_file.name
+            key=f"ground_truth_{idx}_{uploaded_file.name}"
         )
 
         prediction = result["prediction"]
@@ -79,7 +79,7 @@ if uploaded_files:
             st.error("Anomaly Detected")
         else:
             st.success("Normal Image")
-            
+
     st.divider()
 
     st.subheader("Evaluation Summary")
