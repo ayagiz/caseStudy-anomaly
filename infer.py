@@ -7,6 +7,8 @@ import torch.nn.functional as F
 from PIL import Image
 from torchvision import models, transforms
 
+import cv2
+import numpy as np
 
 MODEL_PATH = Path("models/patchcore_memory.pkl")
 
@@ -106,10 +108,37 @@ def predict_image(image, category="hazelnut", threshold=0.5):
     # Image-level anomaly score
     anomaly_score = float(torch.quantile(min_distances, 0.99).item())
 
+    # Patch score map oluştur
+    num_patches = int(min_distances.shape[0] ** 0.5)
+
+    score_map = min_distances.reshape(num_patches, num_patches).numpy()
+
+    # Score map'i image boyutuna büyüt
+    score_map = cv2.resize(
+        score_map,
+        (image.size[0], image.size[1])
+    )
+
+    # Normalize et
+    score_map = score_map - score_map.min()
+    score_map = score_map / (score_map.max() + 1e-8)
+
+    # Heatmap oluştur
+    heatmap = np.uint8(255 * score_map)
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+
+    # Original image numpy
+    original = np.array(image.convert("RGB"))
+
+    # Overlay
+    overlay = cv2.addWeighted(original, 0.6, heatmap, 0.4, 0)
     prediction = "ANOMALY" if anomaly_score >= threshold else "NORMAL"
 
     return {
         "category": category,
         "prediction": prediction,
         "anomaly_score": anomaly_score,
+        "heatmap": heatmap,
+        "overlay": overlay,
     }
