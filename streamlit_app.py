@@ -4,6 +4,8 @@ from PIL import Image
 from infer import predict_image
 from sklearn.metrics import roc_auc_score
 
+import hashlib
+
 st.title("MVTec Anomaly Detection")
 
 category = st.selectbox(
@@ -55,11 +57,15 @@ if uploaded_files:
             threshold=threshold
         )
 
+        image_bytes = uploaded_file.getvalue()
+
+        file_hash = hashlib.md5(image_bytes).hexdigest()
+
         ground_truth = st.radio(
             f"Ground Truth for {uploaded_file.name}",
             ["NORMAL", "ANOMALY"],
             index=0 if default_ground_truth == "NORMAL" else 1,
-            key=f"ground_truth_{idx}_{uploaded_file.name}"
+            key=f"ground_truth_{file_hash}"
         )
 
         prediction = result["prediction"]
