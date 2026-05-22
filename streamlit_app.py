@@ -13,11 +13,16 @@ category = st.selectbox(
     ["hazelnut", "wood"]
 )
 
+default_thresholds = {
+    "hazelnut": 4.7,
+    "wood": 3.6
+}
+
 threshold = st.slider(
     "Threshold",
-    min_value=3.0,
+    min_value=0.0,
     max_value=7.0,
-    value=4.7,
+    value=default_thresholds[category],
     step=0.1
 )
 
