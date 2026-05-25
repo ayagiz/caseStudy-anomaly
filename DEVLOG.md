@@ -15,6 +15,6 @@ array içine atmak gerekeceği için bu sefer prediction da ram yetersizliği ol
 10. Memory bank oluşturma aşamasından sonra modeli test ederken anomali score larına göre kendi elimle threshold tanımladım. Hazelnut için 4.7 ve wood için 3.6 uygun göründü. Wood seçme sebebim hem data set inin diğer setlere göre büyük olmasının doğru prediction yapmayı kolaylaştıracak hemde hazelnut shape-oriented bir yapı iken WOOD resimleri texture-oriented dı. Modelin 2 durumda da başarılı olup olamayacağını merak etmiştim.
 11. Projeye baştan başlasam farklı yapabileceğim bir şey yoktu açıkçası. Yapay zeka konusu üzerine bilgim zaten çok kısıtlı ama öğrenmek istiyorum çünkü bir yazılımcı
 için öğrenmesi şart bir araç bana göre. Sistem beklentimin üzerinde çalıştığı için (Hazelnut AUROC = 0.9868 ve Wood = 0.9754) farklı bir şey yapmaya gerek olduğunu düşünmedim. Belki Resnet18 in layer 3 yerine 
-layer 2 feature map kullanmış olsam gözle bile görülmesi zor olan anomaliler tespit edilebilinirdi ama yinede garantisi yoktu.
+layer 2 feature map kullanmış olsam gözle bile görülmesi zor olan anomaliler tespit edilebilinirdi ama yinede garantisi yoktu. Son olarakta image size ı 224 ten 160 a düşürmek RAM kullanımı açısından çokta önemli olmadığını fark ettim. Daha büyük feature map çıksa bile zaten üzerinden 30 tanesi sample edilecekti. Belki de küçük anomalileri sistem bu yüzden gözden kaçırdı.
 
 
